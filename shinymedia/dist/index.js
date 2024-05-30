@@ -48,6 +48,7 @@ var VideoClipperElement = class extends HTMLElement {
         <div class="panel-buttons">
           <slot name="recording-controls"></slot>
         </div>
+        <pre id="debug"></pre>
     `;
     this.video = this.shadowRoot.querySelector("video");
   }
@@ -181,18 +182,40 @@ var VideoClipperElement = class extends HTMLElement {
     this.recorder.addEventListener("start", () => {
     });
     this.recorder.addEventListener("stop", () => {
+      this.shadowRoot.querySelector("#debug").append(
+        "MediaRecorder stopped\n"
+      );
       if (this.chunks.length === 0) {
-        console.warn("No data recorded");
+        this.shadowRoot.querySelector("#debug").append("No data recorded\n");
         return;
       }
-      const blob = new Blob(this.chunks, { type: this.chunks[0].type });
-      const event = new BlobEvent("data", {
-        data: blob
-      });
+      this.shadowRoot.querySelector("#debug").append(
+        `Recorded ${this.chunks.length} chunks
+`
+      );
       try {
-        this.dispatchEvent(event);
-      } finally {
-        this.chunks = [];
+        const blob = new Blob(this.chunks, { type: this.chunks[0].type });
+        const event = new BlobEvent("data", {
+          data: blob
+        });
+        try {
+          this.shadowRoot.querySelector("#debug").append(
+            "Dispatching event\n"
+          );
+          this.dispatchEvent(event);
+          this.shadowRoot.querySelector("#debug").append(
+            "Event dispatched\n"
+          );
+        } finally {
+          this.chunks = [];
+        }
+      } catch (err) {
+        console.error("Error creating blob or dispatching event: ", err);
+        this.shadowRoot.querySelector("#debug").append(
+          "Error creating blob or dispatching event\n"
+        );
+        this.shadowRoot.querySelector("#debug").append(err + "\n");
+        throw err;
       }
     });
     this.recorder.start();
