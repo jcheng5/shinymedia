@@ -1,3 +1,6 @@
+> [!IMPORTANT]  
+> This repo has moved to https://github.com/posit-dev/shinymedia
+
 # shinymedia
 
 This package provides Shiny UI components relating to audio and video. It currently provides the following two components:
